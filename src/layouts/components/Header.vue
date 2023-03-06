@@ -2,7 +2,7 @@
     <div class="header-container">
         <el-button-group>
             <el-button type="primary" color="#337ecc" style="letter-spacing: 0.1em;">
-                高校经费运行管理系统
+                {{ $system.SYSTEM_NAME }}
             </el-button>
             <el-button type="primary" color="#337ecc">
                 <el-icon>
@@ -16,35 +16,26 @@
                 <el-icon>
                     <DArrowRight />
                 </el-icon>
-                <el-tooltip effect="dark" content="development（开发环境）" placement="bottom-start">
-                    <el-tag style="font-weight: bold;" type="success" effect="dark">
-                        dev
-                    </el-tag>
-                </el-tooltip>
-                <el-tooltip effect="dark" content="testing（测试环境）" placement="bottom-start">
-                    <el-tag style="font-weight: bold;" type="warning" effect="dark">
-                        test
-                    </el-tag>
-                </el-tooltip>
-                <el-tooltip effect="dark" content="production（生产环境）" placement="bottom-start">
-                    <el-tag style="font-weight: bold;" color="#409eff" effect="dark">
-                        prod
+                <el-tooltip effect="dark" :content="environmentTheme.content" placement="bottom-start">
+                    <el-tag style="font-weight: bold;" :type="environmentTheme.type" :color="environmentTheme.color"
+                        effect="dark">
+                        {{ $system.RUNNING_ENVIRONMENT }}
                     </el-tag>
                 </el-tooltip>
             </div>
             <div class="nav-item">
                 <div class="devider"></div>
             </div>
-            <div class="nav-item">
+            <div class="nav-item" v-for="(item, index) in $system.OTHER_TOOLS_BOX" :key="index">
                 <el-icon size="1.2em" color="#409EFF">
-                    <School />
+                    <component :is="item.icon"></component>
                 </el-icon>
-                <span>学院信息</span>
+                <span>{{ item.name }}</span>
             </div>
             <div class="nav-item">
                 <div class="devider"></div>
             </div>
-            <div class="nav-item">
+            <div class="nav-item" v-if="$system.TOOLS_BOX.system_setting">
                 <el-icon size="1.2em" color="#337ecc">
                     <Setting />
                 </el-icon>
@@ -53,53 +44,43 @@
                     <ArrowDown />
                 </el-icon>
             </div>
-            <el-popover :visible="clearCachePopover" placement="bottom" :width="160">
-                <p>Are you sure to delete this?</p>
-                <div style="text-align: right; margin: 0">
-                    <el-button size="small" text @click="handleCancel">cancel</el-button>
-                    <el-button size="small" type="primary" @click="handleConfirm">confirm</el-button>
-                </div>
-                <template #reference>
-                    <div class="nav-item" @click="clearCachePopover = true">
-                        <el-icon size="1.2em" color="#c45656">
-                            <Brush />
-                        </el-icon>
-                        <span>清除缓存</span>
-                    </div>
-                </template>
-            </el-popover>
-            <div class="nav-item">
-                <el-icon size="1.2em" color="#529b2e">
-                    <FullScreen />
-                </el-icon>
-                <span>全屏</span>
-            </div>
+            <CleanCache v-if="$system.TOOLS_BOX.clean_cache" />
+            <FullScreen v-if="$system.TOOLS_BOX.full_screen" />
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import { House, ArrowDown, Setting, Brush, FullScreen, School, DArrowRight } from '@element-plus/icons-vue'
-import { ElNotification } from 'element-plus'
+import type { SYSTEM_CONFIG_TYPE } from '@/utils/system/system.config.types';
+import { House, ArrowDown, Setting, DArrowRight } from '@element-plus/icons-vue'
 import 'element-plus/theme-chalk/el-notification.css'
-import { ref } from 'vue';
+import { getCurrentInstance, computed } from 'vue';
+import CleanCache from '@/utils/components/CleanCache.vue';
+import FullScreen from '@/utils/components/FullScreen.vue';
 
-// 清除缓存
-const clearCachePopover = ref<Boolean>(false);
-function handleConfirm() {
-    localStorage.clear();
-    sessionStorage.clear();
-    ElNotification({
-        title: 'Success',
-        message: '清除全局缓存成功！',
-        type: 'success',
-        duration: 2000
-    })
-    clearCachePopover.value = false;
-}
-function handleCancel() {
-    clearCachePopover.value = false;
-}
+// 系统配置全局变量
+const { proxy }: any = getCurrentInstance();
+const $system: SYSTEM_CONFIG_TYPE = proxy.$system;
+
+// 运行环境Tag样式
+const environmentTheme = computed(() => {
+    if ($system.RUNNING_ENVIRONMENT === 'dev') {
+        return {
+            type: 'success',
+            content: 'development（开发环境）'
+        }
+    } else if ($system.RUNNING_ENVIRONMENT === 'test') {
+        return {
+            type: 'warning',
+            content: 'testing（测试环境）'
+        }
+    } else {
+        return {
+            color: '#409eff',
+            content: 'production（生产环境）'
+        }
+    }
+})
 </script>
 
 <style scoped>
@@ -127,7 +108,6 @@ function handleCancel() {
     display: flex;
     justify-content: center;
     align-items: center;
-    /* align-items: flex-end; */
     flex-direction: row;
     gap: 0.5em;
     cursor: pointer;

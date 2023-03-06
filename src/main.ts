@@ -9,8 +9,9 @@ import { createRouter, createWebHistory } from "vue-router";
 import routes from "virtual:generated-pages";
 // vite-plugin-vue-layouts
 import { setupLayouts } from "virtual:generated-layouts";
+import systemConfig from "./system.config";
 
-const router = createRouter({
+export const router = createRouter({
   routes: setupLayouts(routes),
   history: createWebHistory(),
 });
@@ -19,5 +20,6 @@ const app = createApp(App);
 
 app.use(router);
 app.use(createPinia());
+app.config.globalProperties.$system = systemConfig;
 
 app.mount("#app");

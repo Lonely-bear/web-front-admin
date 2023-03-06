@@ -19,7 +19,7 @@ import Tabs from './components/Tabs.vue';
                 </CardContainer>
             </el-aside>
             <el-main class="main">
-                <CardContainer class="router-view">
+                <CardContainer class="router-view" id="main">
                     <Tabs></Tabs>
                 </CardContainer>
             </el-main>
@@ -30,6 +30,8 @@ import Tabs from './components/Tabs.vue';
 <style scoped>
 .container {
     width: 100%;
+    height: 100%;
+    background-color: #cfdde7;
 }
 
 .top {
@@ -55,7 +57,4 @@ import Tabs from './components/Tabs.vue';
     height: calc(100vh - 72px);
     box-sizing: border-box;
 }
-/* .router-view {
-    padding: 1em;
-} */
 </style>

@@ -11,22 +11,6 @@ interface TOOL {
 }
 
 /**
- * @description 菜单组配置
- */
-interface ChildrenGroup {
-  // 分组名称
-  group_name: string;
-  // 分组icon
-  group_icon: any;
-  // tag颜色
-  group_color: string;
-  // 子菜单
-  children?: MENU[];
-  // 分组子菜单
-  childrenGroups?: ChildrenGroup[];
-}
-
-/**
  * @description 菜单项配置
  */
 export interface MENU {
@@ -34,19 +18,14 @@ export interface MENU {
   _id: string | number;
   // 菜单名称
   name: string;
-  // 菜单属性
-  meta: {
-    // 菜单图标
-    icon: any;
-  };
+  // 菜单图标
+  icon?: any;
   // 菜单路径
   route?: string;
   // 菜单顺序名次
   order: number;
   // 子菜单
   children?: MENU[];
-  // 分组子菜单
-  childrenGroups?: ChildrenGroup[];
 }
 
 /**

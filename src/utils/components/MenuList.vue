@@ -9,7 +9,7 @@
 
 <script setup lang="ts">
 import MenuItem from '@/utils/components/MenuItem.vue';
-import { getCurrentInstance, computed } from 'vue';
+import { getCurrentInstance } from 'vue';
 import type { MENU, SYSTEM_CONFIG_TYPE } from '../system/system.config.types';
 
 // 系统配置全局变量
@@ -31,15 +31,6 @@ function sortMenu(menu: MENU[], order: 'asc' | 'desc') {
         if (item.children) {
             console.log(menu)
             sortMenu(item.children, order)
-        }
-
-        if (item.childrenGroups) {
-            item.childrenGroups.forEach(i => {
-                if (i.children) {
-                    console.log(menu)
-                    sortMenu(i.children, order)
-                }
-            })
         }
     })
 }

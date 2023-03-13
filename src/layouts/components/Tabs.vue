@@ -2,7 +2,11 @@
     <div>
         <el-tabs type="border-card" class="router-view ">
             <el-tab-pane :label="label">
-                <RouterView></RouterView>
+                <el-scrollbar height="calc(100vh - 180px)">
+                    <div style="padding: 5px;padding-right: 20px;box-sizing: border-box;">
+                        <RouterView></RouterView>
+                    </div>
+                </el-scrollbar>
             </el-tab-pane>
         </el-tabs>
     </div>

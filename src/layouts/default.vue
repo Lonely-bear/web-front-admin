@@ -19,9 +19,9 @@ import Tabs from './components/Tabs.vue';
                 </CardContainer>
             </el-aside>
             <el-main class="main">
-                <CardContainer class="router-view" id="main">
-                    <Tabs></Tabs>
-                </CardContainer>
+                    <CardContainer class="router-view" id="main">
+                        <Tabs></Tabs>
+                    </CardContainer>
             </el-main>
         </el-container>
     </el-container>

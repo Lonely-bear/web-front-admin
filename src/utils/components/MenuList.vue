@@ -1,6 +1,6 @@
 <template>
-    <el-menu router :default-active="$system.MENU_LIST[0]._id" active-text-color="#337ecc" background-color="transparent"
-        :collapse="collapse">
+    <el-menu router :default-active="defaultActive" active-text-color="#337ecc" background-color="transparent"
+        :collapse="props.collapse">
         <template v-for="(item, index) in $system.MENU_LIST" :key="index">
             <menu-item :item="item" />
         </template>
@@ -9,12 +9,29 @@
 
 <script setup lang="ts">
 import MenuItem from '@/utils/components/MenuItem.vue';
-import { getCurrentInstance } from 'vue';
+import { getCurrentInstance, ref } from 'vue';
 import type { MENU, SYSTEM_CONFIG_TYPE } from '../system/system.config.types';
+import { useRouter } from 'vue-router';
 
 // 系统配置全局变量
 const { proxy }: any = getCurrentInstance();
 const $system: SYSTEM_CONFIG_TYPE = proxy.$system;
+
+// 监听当前路由，修改菜单选中项
+const router = useRouter();
+const currentRoutePath = router.currentRoute.value.path;
+const defaultActive = ref<string | number>("");
+$system.MENU_LIST.forEach(item => {
+    if (item.route === currentRoutePath) {
+        defaultActive.value = item._id
+    } else if (item.children) {
+        item.children.forEach(i => {
+            if (i.route === currentRoutePath) {
+                defaultActive.value = i._id
+            }
+        })
+    }
+})
 
 /**
  * 菜单数组排序
@@ -29,7 +46,6 @@ function sortMenu(menu: MENU[], order: 'asc' | 'desc') {
     }
     menu.forEach(item => {
         if (item.children) {
-            console.log(menu)
             sortMenu(item.children, order)
         }
     })
@@ -37,7 +53,7 @@ function sortMenu(menu: MENU[], order: 'asc' | 'desc') {
 sortMenu($system.MENU_LIST, 'asc');
 
 
-const { collapse } = defineProps({
+const props = defineProps({
     collapse: {
         type: Boolean,
         required: false

@@ -13,5 +13,5 @@ git commit -m %info: =%
 git push
 
 @echo off
-echo Push Success!
+echo ??Push Success!??
 pause

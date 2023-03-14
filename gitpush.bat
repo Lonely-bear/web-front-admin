@@ -1,7 +1,6 @@
 @echo off
 echo Start push your code......
 @echo on
-
 git add .
 @echo off
 set d=%date:~8,2%

@@ -14,5 +14,5 @@ git push
 
 @echo off
 echo Push Success!
-echo ヾ(￣▽￣)Bye~Bye~
+echo Bye~Bye~
 pause

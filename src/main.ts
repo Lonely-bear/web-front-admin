@@ -11,11 +11,13 @@ import routes from "virtual:generated-pages";
 import { setupLayouts } from "virtual:generated-layouts";
 import systemConfig from "./system.config";
 // axios
-import axios from './api/index'
+import $api from './api/index'
 // element-plus/icons
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
+import ElementPlus from 'element-plus'
+import 'element-plus/dist/index.css'
 // xlsx
-import xlsx from './utils/xlsx'
+import $xlsx from './utils/xlsx'
 
 export const router = createRouter({
   routes: setupLayouts(routes),
@@ -26,10 +28,14 @@ const app = createApp(App);
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
   app.component(key, component)
 }
-app.config.globalProperties.$api = axios;
-app.config.globalProperties.$xlsx = xlsx;
+
+app.provide('global', {
+  $api,
+  $xlsx
+})
 
 app.use(router);
+app.use(ElementPlus);
 app.use(createPinia());
 app.config.globalProperties.$system = systemConfig;
 

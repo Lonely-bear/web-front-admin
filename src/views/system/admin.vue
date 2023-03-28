@@ -1,23 +1,27 @@
+<!-- eslint-disable vue/multi-word-component-names -->
 <route lang="yaml">
 name: 用户管理
 </route>
 
 <script setup lang="ts">
-import { getCurrentInstance, onBeforeMount, ref } from 'vue';
-const { proxy }: any = getCurrentInstance();
-const $api = proxy.$api;
-const $xlsx = proxy.$xlsx;
+import type { Columns, TableOptions } from '@/components/table/@types';
+import { inject, onBeforeMount, ref } from 'vue';
+import CustomTable from '@/components/table/CustomTable.vue'
 
-const tableData = ref(null);
+const { $api, $xlsx } = inject('global') as { $api?: any, $xlsx?: any }
+
+const tableData = ref<any[] | null>(null);
 function initTableData() {
     $api({
         url: '/user/users',
         method: 'GET'
     }).then((res: any) => {
-        tableData.value = res.data
+        tableData.value = res.data.data
+        console.log(tableData.value)
     })
 }
 onBeforeMount(() => initTableData())
+
 
 // 新增对象
 const add = ref({
@@ -26,7 +30,7 @@ const add = ref({
         user_name: "",
         pass_word: "",
         role_id: ""
-    },
+    } as any,
     confirm() {
         add.value.showDialog = false;
         $api({
@@ -51,7 +55,7 @@ const edit = ref({
         user_name: "",
         pass_word: "",
         role_id: ""
-    },
+    } as any,
     confirm() {
         edit.value.showDialog = false;
         $api({
@@ -64,14 +68,14 @@ const edit = ref({
         edit.value.showDialog = false
     },
     handleClick(row: any) {
-        Object.keys(edit.value.formData).forEach(key => edit.value.formData[key] = row[key]);
+        Object.keys(edit.value.formData).forEach(key => edit.value.formData[key as keyof typeof edit.value.formData] = row[key]);
         edit.value.showDialog = true
     }
 })
 
 // 删除对象
 const deleteModel = ref({
-    confirm(row) {
+    confirm(row: any) {
         $api({
             url: `/user/${row._id}`,
             method: "DELETE"
@@ -81,17 +85,18 @@ const deleteModel = ref({
 
 // xlsx导出excel表格
 function exportXlsx(fileName: string) {
+    fileName = fileName ?? new Date().toDateString()
     const xlsxHead = {
-        _id: "用户Id",
+        _id: "用户ID",
         user_name: "用户名",
         pass_word: "密码",
-        role_id: "角色Id"
+        role_id: "角色ID"
     }
-    const copy = tableData.value?.data.map(item => {
-        const obj = {};
+    const copy = tableData.value?.map(item => {
+        const obj: any = {};
         for (const key in xlsxHead) {
-            if (xlsxHead[key]) {
-                obj[xlsxHead[key]] = item[key];
+            if (xlsxHead[key as keyof typeof xlsxHead]) {
+                obj[xlsxHead[key as keyof typeof xlsxHead]] = item[key];
             }
         }
         return obj
@@ -101,45 +106,93 @@ function exportXlsx(fileName: string) {
     $xlsx.utils.book_append_sheet(book, sheet, 'data');
     $xlsx.writeFile(book, `${fileName}.xlsx`);
 }
+
+const tableOptions: TableOptions = {
+    search :{
+        visible: true,
+        filters: ['user_name']
+    },
+    column: {
+        hiddens: ['__v'],
+        buttonGroup: [
+            {
+                text: '编辑',
+                attrs: {
+                    icon: 'edit',
+                    type: 'primary',
+                    link: true
+                },
+                onClick: edit.value.handleClick
+            },{
+                text: '删除',
+                attrs: {
+                    icon: 'delete',
+                    type: 'danger',
+                    link: true
+                },
+                onClick: deleteModel.value.confirm
+            }
+        ]
+    },
+    topTools: {
+        visible: true,
+        buttonGroup: [
+            {
+                text: '新增数据',
+                attrs: {
+                    icon: 'plus',
+                    type: 'primary',
+                },
+                onClick: add.value.handleClick
+            },
+            {
+                text: '导出数据',
+                attrs: {
+                    icon: 'download',
+                    type: 'default'
+                },
+                onClick: exportXlsx
+            }
+        ]
+    },
+    pagination: {
+        visible: true
+    },
+    table: {
+        attrs: {
+            height: 'calc(100vh - 450px)'
+        }
+    }
+}
+
+const columnOptions: Columns[] = [
+    {
+        prop: '_id',
+        label: '用户ID'
+    },{
+        prop: 'role_id',
+        label: '角色ID'
+    },{
+        prop: 'user_name',
+        label: '用户名'
+    },{
+        prop: 'pass_word',
+        label: '密码'
+    }
+]
 </script>
 
 <template>
-    <div>
-        <el-button type="success" icon="Plus" @click="add.handleClick">新增</el-button>
-        <el-button type="primary" icon="Link" @click="exportXlsx('管理员用户信息')">导出</el-button>
-    </div>
-    <el-table v-if="tableData" :data="tableData.data">
-        <el-table-column label="_id" prop="_id"></el-table-column>
-        <el-table-column label="用户名" prop="user_name"></el-table-column>
-        <el-table-column label="密码" prop="pass_word"></el-table-column>
-        <el-table-column label="角色" prop="role_id"></el-table-column>
-        <el-table-column label="操作">
-            <template v-slot="scope">
-                <el-button link type="primary" @click="edit.handleClick(scope.row)">修改</el-button>
-                <el-popconfirm width="220" confirm-button-text="删除" cancel-button-text="取消" icon-color="#626AEF"
-                    title="确认删除该记录?" @confirm="deleteModel.confirm(scope.row)">
-                    <template #reference>
-                        <el-button link type="danger">删除</el-button>
-                    </template>
-                </el-popconfirm>
-            </template>
-        </el-table-column>
-    </el-table>
+    <CustomTable v-if="tableData" :table-data="tableData" :table-options="tableOptions" :column-options="columnOptions" />
 
-    <!-- 添加用户 -->
+    <!-- 添加 -->
     <el-dialog v-model="add.showDialog" width="30%" :close-on-click-modal="false">
         <template #header>
-            添加管理员用户
+            添加数据
         </template>
-        <el-form :data="add.formData" label-width="60px">
-            <el-form-item label="用户名">
-                <el-input v-model="add.formData.user_name" placeholder="请输入用户名"></el-input>
-            </el-form-item>
-            <el-form-item label="密码">
-                <el-input v-model="add.formData.pass_word" placeholder="请输入密码"></el-input>
-            </el-form-item>
-            <el-form-item label="角色">
-                <el-input v-model="add.formData.role_id" placeholder="请输入角色id"></el-input>
+        <el-form :data="add.formData" label-width="100px">
+            <el-form-item :label="item.label ?? item.prop" v-for="item in columnOptions" :key="item.prop">
+                <el-input v-model="add.formData[item.prop]" :placeholder="`请输入${item.label ?? item.prop}`" :disabled="item.prop === '_id'"></el-input>
             </el-form-item>
             <el-form-item>
                 <el-button @click="add.cancel">取消</el-button>
@@ -148,20 +201,14 @@ function exportXlsx(fileName: string) {
         </el-form>
     </el-dialog>
 
-    <!-- 修改用户 -->
+    <!-- 修改 -->
     <el-dialog v-model="edit.showDialog" width="30%" :close-on-click-modal="false">
         <template #header>
-            修改管理员用户
+            修改数据
         </template>
-        <el-form :data="edit.formData" label-width="60px">
-            <el-form-item label="用户名">
-                <el-input v-model="edit.formData.user_name" placeholder="请输入用户名"></el-input>
-            </el-form-item>
-            <el-form-item label="密码">
-                <el-input v-model="edit.formData.pass_word" placeholder="请输入密码"></el-input>
-            </el-form-item>
-            <el-form-item label="角色">
-                <el-input v-model="edit.formData.role_id" placeholder="请输入角色id"></el-input>
+        <el-form :data="edit.formData" label-width="100px">
+            <el-form-item :label="item.label ?? item.prop" v-for="item in columnOptions" :key="item.prop">
+                <el-input v-model="edit.formData[item.prop]" :placeholder="`请输入${item.label ?? item.prop}`" :disabled="item.prop === '_id'"></el-input>
             </el-form-item>
             <el-form-item>
                 <el-button @click="edit.cancel">取消</el-button>

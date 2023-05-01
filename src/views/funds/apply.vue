@@ -200,7 +200,9 @@ const columnOptions: Columns[] = [
 </script>
     
 <template>
-    <CustomTable v-if="tableData" :table-data="tableData" :table-options="tableOptions" :column-options="columnOptions" />
+    <div v-loading="!tableData">
+        <CustomTable v-if="tableData" :table-data="tableData" :table-options="tableOptions" :column-options="columnOptions" />
+    </div>
 
     <!-- 添加 -->
     <el-dialog v-model="add.showDialog" width="30%" :close-on-click-modal="false">

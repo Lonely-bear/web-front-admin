@@ -4,16 +4,12 @@ import {
   Operation,
   DataAnalysis,
   Money,
-  Wallet,
-  Tickets,
-  Postcard,
-  Switch,
-  Connection,
   House,
 } from "@element-plus/icons-vue";
 
 export default defineConfig({
-  SYSTEM_NAME: "Funds Management System",
+  // SYSTEM_NAME: "Funds Management System",
+  SYSTEM_NAME: "高校本科教学经费运行管理系统",
   RUNNING_ENVIRONMENT: "dev",
   TOOLS_BOX: {
     system_setting: {
